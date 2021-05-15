@@ -82,16 +82,33 @@
             // console.log(mimeType);
             app.$data.loading = false;
 
-            const view = new google.picker.DocsView(google.picker.ViewId.DOCS);
-            view.setMimeTypes(mimeType);
+            const docsView = new google.picker.DocsView()
+                .setIncludeFolders(true)
+                .setMimeTypes(mimeType)
+                .setSelectFolderEnabled(false)
+                .setLabel('Googleドライブ');
+            const docsStarred = new google.picker.DocsView()
+                .setStarred(true)
+                .setOwnedByMe(true)
+                .setIncludeFolders(true)
+                .setSelectFolderEnabled(false)
+                .setLabel('スター付きアイテム')
+            const docsshare = new google.picker.DocsView()
+                .setOwnedByMe(false)
+                .setIncludeFolders(true)
+                .setSelectFolderEnabled(false)
+                .setLabel('共有アイテム')
+
             const picker = new google.picker.PickerBuilder()
-                .enableFeature(google.picker.Feature.NAV_HIDDEN)
-                .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
+                .addView(docsView)
+                .addView(docsStarred)
+                .addView(docsshare)
+                .hideTitleBar()
+                .setLocale("ja")
                 .setOrigin(google.script.host.origin)
-                .setOAuthToken(oauthToken)
-                .addView(view)
-                .addView(new google.picker.DocsUploadView())
+                .setSize(1051, 650)
                 .setDeveloperKey(apiKey)
+                .setOAuthToken(oauthToken)
                 .setCallback(pickerCallback)
                 .build();
             picker.setVisible(true);
@@ -100,9 +117,21 @@
 
     // A simple callback implementation.
     function pickerCallback(data) {
-        if (data.action === google.picker.Action.PICKED) {
-            const fileId = data.docs[0].id;
-            alert("The user selected: " + fileId);
+        var action = data[google.picker.Response.ACTION];
+        if (action == google.picker.Action.PICKED) {
+            const doc = data[google.picker.Response.DOCUMENTS][0];
+            const url = doc[google.picker.Document.URL];
+            app.$data.loading = true;
+            google.script.run.withFailureHandler(function(err){
+                app.$data.loading = false;
+                alert("ERROR:"+url+"\n"+err);
+                //document.getElementById('message').innerHTML = "ERROR: "+url;
+            }).withSuccessHandler(function(){
+                app.$data.loading = false;
+                google.script.host.close();
+            }).pickerHandler({command, cursor, url});
+        } else if (action == google.picker.Action.CANCEL) {
+            google.script.host.close();
         }
     }
 

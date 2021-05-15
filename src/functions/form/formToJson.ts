@@ -241,18 +241,19 @@ function createCorrectnessFeedbackObject(
   item: FormItem
 ): CorrectnessFeedbackObject {
   const typedItem = item as CorrectnessFeedbackItem;
-  const feedbackForCorrect = feedbackToJson(
+  const feedbackForCorrect = typedItem.getFeedbackForCorrect ? feedbackToJson(
     "correctnessFeedback",
     typedItem.getFeedbackForCorrect()
-  );
-  const feedbackForIncorrect = feedbackToJson(
+  ) : undefined;
+  const feedbackForIncorrect = typedItem.getFeedbackForIncorrect ? feedbackToJson(
     "correctnessFeedback",
     typedItem.getFeedbackForIncorrect()
-  );
+  ): undefined;
+  const points = typedItem.getPoints? typedItem.getPoints() : undefined;
   return {
-    points: typedItem.getPoints(),
-    feedbackForCorrect: feedbackForCorrect,
-    feedbackForIncorrect: feedbackForIncorrect,
+    points,
+    feedbackForCorrect,
+    feedbackForIncorrect,
   } as CorrectnessFeedbackObject;
 }
 
@@ -276,20 +277,20 @@ function itemToObject(
   | OtherItemObject {
   const typedItemObject = createItemObject(item);
 
+  Logger.log(item.getIndex()+"  "+item.getType().toString()+" "+item.getTitle());
+
   switch (item.getType()) {
     case FormApp.ItemType.CHECKBOX:
     case FormApp.ItemType.MULTIPLE_CHOICE:
       return (() => {
-        const typedItem = (item as unknown) as
-          | CheckboxItem
-          | MultipleChoiceItem;
+        const typedItem = (item.getType() === FormApp.ItemType.CHECKBOX) ? item.asCheckboxItem() : item.asMultipleChoiceItem();
         const correctnessFeedbackObject = createCorrectnessFeedbackObject(
           typedItem
         );
         return {
-          isRequired: typedItem.isRequired(),
-          hasOtherOption: typedItem.hasOtherOption(),
-          choices: typedItem.getChoices().map(choiceToJson),
+          isRequired: typedItem.isRequired && typedItem.isRequired(),
+          hasOtherOption: typedItem.hasOtherOption && typedItem.hasOtherOption(),
+          choices: typedItem.getChoices && typedItem.getChoices().map(choiceToJson),
           ...(correctnessFeedbackObject ? correctnessFeedbackObject : {}),
           ...typedItemObject,
         } as CheckboxItemObject | MultipleChoiceItemObject;
@@ -297,7 +298,7 @@ function itemToObject(
 
     case FormApp.ItemType.LIST:
       return (() => {
-        const typedItem = (item as unknown) as ListItem;
+        const typedItem = item.asListItem();
         const correctnessFeedbackObject = createCorrectnessFeedbackObject(
           typedItem
         );
@@ -312,7 +313,7 @@ function itemToObject(
     case FormApp.ItemType.DATE:
     case FormApp.ItemType.DATETIME:
       return (() => {
-        const typedItem = (item as unknown) as DateItem | DateTimeItem;
+        const typedItem = (item.getType() === FormApp.ItemType.DATE)? item.asDateItem() : item.asDateTimeItem();
         const generalFeedbackObject = createGeneralFeedbackObject(typedItem);
         return {
           isRequired: typedItem.isRequired(),
@@ -324,7 +325,7 @@ function itemToObject(
 
     case FormApp.ItemType.TIME:
       return (() => {
-        const typedItem = (item as unknown) as TimeItem;
+        const typedItem = item.asTimeItem();
         const generalFeedbackObject = createGeneralFeedbackObject(typedItem);
         return {
           isRequired: typedItem.isRequired(),
@@ -335,7 +336,7 @@ function itemToObject(
 
     case FormApp.ItemType.DURATION:
       return (() => {
-        const typedItem = (item as unknown) as DurationItem;
+        const typedItem = item.asDurationItem();
         const generalFeedbackObject = createGeneralFeedbackObject(typedItem);
         return {
           isRequired: typedItem.isRequired(),
@@ -347,7 +348,7 @@ function itemToObject(
     case FormApp.ItemType.CHECKBOX_GRID:
     case FormApp.ItemType.GRID:
       return (() => {
-        const typedItem = (item as unknown) as CheckboxGridItem | GridItem;
+        const typedItem = (item.getType() === FormApp.ItemType.CHECKBOX_GRID) ? item.asCheckboxGridItem() : item.asGridItem();
         const generalFeedbackObject = createGeneralFeedbackObject(typedItem);
         return {
           isRequired: typedItem.isRequired(),
@@ -360,7 +361,7 @@ function itemToObject(
 
     case FormApp.ItemType.PARAGRAPH_TEXT:
       return (() => {
-        const typedItem = (item as unknown) as ParagraphTextItem;
+        const typedItem = item.asParagraphTextItem();
         const generalFeedbackObject = createGeneralFeedbackObject(typedItem);
         return {
           isRequired: typedItem.isRequired(),
@@ -372,7 +373,7 @@ function itemToObject(
 
     case FormApp.ItemType.SCALE:
       return (() => {
-        const typedItem = (item as unknown) as ScaleItem;
+        const typedItem = item.asScaleItem();
         const generalFeedbackObject = createGeneralFeedbackObject(typedItem);
         return {
           isRequired: typedItem.isRequired(),
@@ -387,7 +388,7 @@ function itemToObject(
 
     case FormApp.ItemType.TEXT:
       return (() => {
-        const typedItem = (item as unknown) as TextItem;
+        const typedItem = item.asTextItem();
         const generalFeedbackObject = createGeneralFeedbackObject(typedItem);
         return {
           isRequired: typedItem.isRequired(),
@@ -399,7 +400,7 @@ function itemToObject(
 
     case FormApp.ItemType.IMAGE:
       return (() => {
-        const typedItem = (item as unknown) as ImageItem;
+        const typedItem = item.asImageItem();
         return {
           image: blobToJson(typedItem.getImage()),
           alignment: getAlignmentString(typedItem.getAlignment()),
@@ -410,7 +411,7 @@ function itemToObject(
 
     case FormApp.ItemType.VIDEO:
       return (() => {
-        const typedItem = (item as unknown) as VideoItem;
+        const typedItem = item.asVideoItem();
         return {
           // videoUrl: typedItem.getVideoUrl(),
           alignment: getAlignmentString(typedItem.getAlignment()),
@@ -421,12 +422,13 @@ function itemToObject(
 
     case FormApp.ItemType.PAGE_BREAK:
       return (() => {
-        const typedItem = (item as unknown) as PageBreakItem;
-        if (typedItem.getGoToPage()) {
+        const typedItem = item.asPageBreakItem();
+        const pageNavigationType = item.asPageBreakItem().getPageNavigationType();
+        if (typedItem.getGoToPage && typedItem.getGoToPage()) {
           const goToPageTitle = typedItem.getGoToPage().getTitle();
           return {
             pageNavigationType: getPageNavigationTypeString(
-              typedItem.getPageNavigationType()
+              pageNavigationType
             ),
             goToPageTitle,
             ...typedItemObject,
@@ -434,7 +436,7 @@ function itemToObject(
         } else {
           return {
             pageNavigationType: getPageNavigationTypeString(
-              typedItem.getPageNavigationType()
+              pageNavigationType
             ),
             ...typedItemObject,
           } as PageBreakItemObject;

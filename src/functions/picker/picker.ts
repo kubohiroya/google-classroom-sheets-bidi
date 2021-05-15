@@ -1,3 +1,5 @@
+import {execute} from '../execute';
+
 export function showPicker(
   title: string,
   mimeTypes: string[],
@@ -43,10 +45,9 @@ export function pickerHandler(ev: {
   const command = ev.command.split(",");
   const cursor = parseInt(ev.cursor);
   const url = ev.url;
-  /*
-  // FIXME
+
   if (cursor < command.length - 1) {
     execute(command, cursor + 1, { url });
   }
-   */
+
 }

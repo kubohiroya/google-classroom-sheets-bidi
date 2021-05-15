@@ -1,6 +1,6 @@
 {
   "name": "google-classroom-sheets-util",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Google Classroom Utilities based on Google Spreadsheet / Google Apps Script",
   "main": "src/Code.ts",
   "repository": "https://github.com/kubohiroya/google-classroom-sheets-util.git",
@@ -8,7 +8,7 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "build": "webpack --mode=production && cp appsscript.json src/functions/picker/picker.html dist",
+    "build": "webpack --mode=development && cp appsscript.json src/functions/picker/picker.html dist",
     "deploy": "yarn build && clasp push"
   },
   "devDependencies": {
