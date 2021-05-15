@@ -4,8 +4,15 @@ export function showPicker(
   command: string[],
   cursor: number
 ): void {
+  const documentProps = PropertiesService.getDocumentProperties();
+  let apiKey = documentProps.getProperty("PICKER_API_KEY");
+  while(! apiKey){
+    apiKey = Browser.inputBox("PICKER_API_KEY");
+    documentProps.setProperty("PICKER_API_KEY", apiKey);
+  }
+
   const picker = HtmlService.createTemplateFromFile("picker");
-  picker.apiKey = process.env.PICKER_API_KEY;
+  picker.apiKey = apiKey;
   picker.mimeType = mimeTypes.join(",");
   picker.command = command.join(",");
   picker.cursor = cursor.toString();
@@ -17,7 +24,7 @@ export function showPicker(
 
 //Access Tokenを取得する
 export function getOAuthToken(): string {
-  //DriveApp.getRootFolder();
+  DriveApp.getRootFolder();
   return ScriptApp.getOAuthToken();
 }
 
