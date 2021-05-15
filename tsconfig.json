@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "lib": ["es2019"],
+    "experimentalDecorators": true,
+    "sourceMap": true,
+    "target": "es5",
+    "module": "es2015",
+    "moduleResolution": "node"
+  }
+}
+

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Google Drive File Picker</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui"
+    />
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+    <link
+            href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css"
+            rel="stylesheet"
+    />
+</head>
+<body>
+<div id="app">
+    <div v-if="loading">
+        <v-progress-circular indeterminate color="primary"></v-progress-circular>
+    </div>
+</div>
+<script type="text/javascript">
+    /*
+    import Vue from "vue";
+    import Vuetify from "vuetify";
+    import "vuetify/dist/vuetify.min.css";
+    */
+    Vue.use(Vuetify);
+    const vuetify = new Vuetify({});
+
+    const app = new Vue({
+        vuetify,
+        data: function () {
+            return {
+                loading: true,
+            };
+        },
+    }).$mount("#app");
+
+    const apiKey = "<?!= apiKey ?>";
+    const mimeType = "<?!= mimeType ?>";
+    const command = "<?!= command ?>";
+    const cursor = "<?= cursor ?>";
+
+    const scope = ["https://www.googleapis.com/auth/drive.file"];
+
+    let pickerApiLoaded = false;
+    let oauthToken = null;
+
+    // Use the Google API Loader script to load the google.picker script.
+    function onAPILoad() {
+        console.log('onAPILoad');
+        gapi.load("auth", { callback: onAuthApiLoad });
+        gapi.load("picker", { callback: onPickerApiLoad });
+    }
+
+    function onAuthApiLoad() {
+        google.script.run
+            .withSuccessHandler(function (token) {
+                oauthToken = token;
+                console.log('onAuthApiLoad');
+                createPicker();
+            })
+            .withFailureHandler(function (error) {
+                alert(error);
+            })
+            .getOAuthToken();
+    }
+
+    function onPickerApiLoad() {
+        pickerApiLoaded = true;
+        createPicker();
+    }
+
+    // Create and render a Picker object for searching images.
+    function createPicker() {
+        if (pickerApiLoaded && oauthToken) {
+            console.log(mimeType);
+            app.$data.loading = false;
+
+            const view = new google.picker.DocsView(google.picker.ViewId.DOCS);
+            view.setMimeTypes(mimeType);
+            const picker = new google.picker.PickerBuilder()
+                .enableFeature(google.picker.Feature.NAV_HIDDEN)
+                .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
+                .setOrigin(google.script.host.origin)
+                // .setAppId(apiKey)
+                .setOAuthToken(oauthToken)
+                .addView(view)
+                .addView(new google.picker.DocsUploadView())
+                .setDeveloperKey(apiKey)
+                .setCallback(pickerCallback)
+                .build();
+            picker.setVisible(true);
+        }
+    }
+
+    // A simple callback implementation.
+    function pickerCallback(data) {
+        if (data.action === google.picker.Action.PICKED) {
+            const fileId = data.docs[0].id;
+            alert("The user selected: " + fileId);
+        }
+    }
+    global.onAPILoad = onAPILoad;
+    // GAS.onAPILoad = onAPILoad;
+    console.log('init');
+
+</script>
+
+<script src="https://apis.google.com/js/api.js?onload=onAPILoad"></script>
+
+</body>
+</html>
