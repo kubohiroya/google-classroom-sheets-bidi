@@ -68,7 +68,7 @@ export function onOpen(): void {
     );
 
 
-  ui.createMenu("相互評価")
+  ui.createMenu("Util")
     .addSubMenu(importClassroomSubMenu)
     .addSubMenu(exportClassroomSubMenu)
     .addSeparator()
