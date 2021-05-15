@@ -53,7 +53,7 @@
 
     // Use the Google API Loader script to load the google.picker script.
     function onAPILoad() {
-        console.log('onAPILoad');
+        // console.log('onAPILoad');
         gapi.load("auth", { callback: onAuthApiLoad });
         gapi.load("picker", { callback: onPickerApiLoad });
     }
@@ -61,8 +61,8 @@
     function onAuthApiLoad() {
         google.script.run
             .withSuccessHandler(function (token) {
+                // console.log('onAuthApiLoad');
                 oauthToken = token;
-                console.log('onAuthApiLoad');
                 createPicker();
             })
             .withFailureHandler(function (error) {
@@ -79,7 +79,7 @@
     // Create and render a Picker object for searching images.
     function createPicker() {
         if (pickerApiLoaded && oauthToken) {
-            console.log(mimeType);
+            // console.log(mimeType);
             app.$data.loading = false;
 
             const view = new google.picker.DocsView(google.picker.ViewId.DOCS);
@@ -88,7 +88,6 @@
                 .enableFeature(google.picker.Feature.NAV_HIDDEN)
                 .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
                 .setOrigin(google.script.host.origin)
-                // .setAppId(apiKey)
                 .setOAuthToken(oauthToken)
                 .addView(view)
                 .addView(new google.picker.DocsUploadView())
@@ -106,9 +105,6 @@
             alert("The user selected: " + fileId);
         }
     }
-    global.onAPILoad = onAPILoad;
-    // GAS.onAPILoad = onAPILoad;
-    console.log('init');
 
 </script>
 
