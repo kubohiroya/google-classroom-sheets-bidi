@@ -22,7 +22,7 @@ Open *"Util"* menu to invoke bi-directional translation from/to the Google Sprea
 
 ![image](https://user-images.githubusercontent.com/1578247/118382152-7a812680-b62d-11eb-8ee7-dafd914a5e59.png)
 
-## Bi-directional translation a Google Form document(a form definition) to/from a Google Spreadsheet document.
+## Bi-directional translation oｆ a Google Form document(a form definition) to/from a Google Spreadsheet document.
 
 ![image](https://user-images.githubusercontent.com/1578247/118382215-f67b6e80-b62d-11eb-9f5d-1f31f718c8d4.png)
 
