@@ -1,6 +1,6 @@
 {
   "name": "google-classroom-sheets-util",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Google Classroom Utilities based on Google Spreadsheet / Google Apps Script",
   "main": "src/Code.ts",
   "repository": "https://github.com/kubohiroya/google-classroom-sheets-util.git",
