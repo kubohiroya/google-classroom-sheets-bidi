@@ -461,7 +461,6 @@ function itemToRows(item: ItemObject): SpreadsheetValues {
 function jsonToValues(json: FormSource): SpreadsheetValues {
   const values: SpreadsheetValues = [];
   const keys = METADATA_KEYS as Array<keyof FormMetadataObject>;
-  values.push(["editors", json.metadata["editors"].join(",")]);
 
   keys.forEach(function (key: keyof FormMetadataObject) {
     if (key === "editors") {
