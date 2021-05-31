@@ -257,14 +257,13 @@ function createCorrectnessFeedbackObject(
   } as CorrectnessFeedbackObject;
 }
 
-function createGeneralFeedbackObject(item: FormItem): GeneralFeedbackObject {
-  const typedItem = item as GeneralFeedbackItem;
+function createGeneralFeedbackObject(quizFeedback: QuizFeedback, points: number): GeneralFeedbackObject {
   const generalFeedback = feedbackToJson(
     "generalFeedback",
-    typedItem.getGeneralFeedback()
+    quizFeedback,
   );
   return {
-    points: typedItem.getPoints(),
+    points,
     ...(generalFeedback ? { ...generalFeedback } : {}),
   };
 }
@@ -314,7 +313,8 @@ function itemToObject(
     case FormApp.ItemType.DATETIME:
       return (() => {
         const typedItem = (item.getType() === FormApp.ItemType.DATE)? item.asDateItem() : item.asDateTimeItem();
-        const generalFeedbackObject = createGeneralFeedbackObject(typedItem);
+        const quizFeedback = typedItem.getGeneralFeedback();
+        const generalFeedbackObject = createGeneralFeedbackObject(quizFeedback, typedItem.getPoints());
         return {
           isRequired: typedItem.isRequired(),
           includesYear: typedItem.includesYear(),
@@ -326,7 +326,8 @@ function itemToObject(
     case FormApp.ItemType.TIME:
       return (() => {
         const typedItem = item.asTimeItem();
-        const generalFeedbackObject = createGeneralFeedbackObject(typedItem);
+        const quizFeedback = typedItem.getGeneralFeedback();
+        const generalFeedbackObject = createGeneralFeedbackObject(quizFeedback, typedItem.getPoints());
         return {
           isRequired: typedItem.isRequired(),
           ...(generalFeedbackObject ? generalFeedbackObject : {}),
@@ -337,7 +338,8 @@ function itemToObject(
     case FormApp.ItemType.DURATION:
       return (() => {
         const typedItem = item.asDurationItem();
-        const generalFeedbackObject = createGeneralFeedbackObject(typedItem);
+        const quizFeedback = typedItem.getGeneralFeedback();
+        const generalFeedbackObject = createGeneralFeedbackObject(quizFeedback, typedItem.getPoints());
         return {
           isRequired: typedItem.isRequired(),
           ...(generalFeedbackObject ? generalFeedbackObject : {}),
@@ -346,15 +348,30 @@ function itemToObject(
       })();
 
     case FormApp.ItemType.CHECKBOX_GRID:
-    case FormApp.ItemType.GRID:
       return (() => {
-        const typedItem = (item.getType() === FormApp.ItemType.CHECKBOX_GRID) ? item.asCheckboxGridItem() : item.asGridItem();
-        const generalFeedbackObject = createGeneralFeedbackObject(typedItem);
+        const typedItem = item.asCheckboxGridItem();
+        // TODO: The CheckboxGridItem type of Forms API doesn't have getGeneralFeedback and getPoints method, for now.
+        //const quizFeedback = typedItem.getGeneralFeedback();
+        //const generalFeedbackObject = createGeneralFeedbackObject(quizFeedback, typedItem.getPoints());
         return {
           isRequired: typedItem.isRequired(),
           rows: typedItem.getRows(),
           columns: typedItem.getColumns(),
-          ...(generalFeedbackObject ? generalFeedbackObject : {}),
+          // ...(generalFeedbackObject ? generalFeedbackObject : {}),
+          ...typedItemObject,
+        } as CheckboxGridItemObject | GridItemObject;
+      })();
+    case FormApp.ItemType.GRID:
+      return (() => {
+        const typedItem = item.asGridItem();
+        // TODO: The GridItem type of Forms API doesn't have getGeneralFeedback and getPoints method, for now.
+        // const quizFeedback = typedItem.getGeneralFeedback();
+        // const generalFeedbackObject = createGeneralFeedbackObject(quizFeedback, typedItem.getPoints());
+        return {
+          isRequired: typedItem.isRequired(),
+          rows: typedItem.getRows(),
+          columns: typedItem.getColumns(),
+          // ...(generalFeedbackObject ? generalFeedbackObject : {}),
           ...typedItemObject,
         } as CheckboxGridItemObject | GridItemObject;
       })();
@@ -362,7 +379,8 @@ function itemToObject(
     case FormApp.ItemType.PARAGRAPH_TEXT:
       return (() => {
         const typedItem = item.asParagraphTextItem();
-        const generalFeedbackObject = createGeneralFeedbackObject(typedItem);
+        const quizFeedback = typedItem.getGeneralFeedback();
+        const generalFeedbackObject = createGeneralFeedbackObject(quizFeedback, typedItem.getPoints());
         return {
           isRequired: typedItem.isRequired(),
           ...(generalFeedbackObject ? generalFeedbackObject : {}),
@@ -374,7 +392,8 @@ function itemToObject(
     case FormApp.ItemType.SCALE:
       return (() => {
         const typedItem = item.asScaleItem();
-        const generalFeedbackObject = createGeneralFeedbackObject(typedItem);
+        const quizFeedback = typedItem.getGeneralFeedback();
+        const generalFeedbackObject = createGeneralFeedbackObject(quizFeedback, typedItem.getPoints());
         return {
           isRequired: typedItem.isRequired(),
           leftLabel: typedItem.getLeftLabel(),
@@ -389,7 +408,8 @@ function itemToObject(
     case FormApp.ItemType.TEXT:
       return (() => {
         const typedItem = item.asTextItem();
-        const generalFeedbackObject = createGeneralFeedbackObject(typedItem);
+        const quizFeedback = typedItem.getGeneralFeedback();
+        const generalFeedbackObject = createGeneralFeedbackObject(quizFeedback, typedItem.getPoints());
         return {
           isRequired: typedItem.isRequired(),
           // validation: undefined
