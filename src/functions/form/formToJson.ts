@@ -350,7 +350,7 @@ function itemToObject(
     case FormApp.ItemType.CHECKBOX_GRID:
       return (() => {
         const typedItem = item.asCheckboxGridItem();
-        // TODO: The CheckboxGridItem type of Forms API doesn't have getGeneralFeedback and getPoints method, for now.
+        // TODO: The CheckboxGridItem type of Forms API doesn't have getGeneralFeedback and getPoints method for now.
         //const quizFeedback = typedItem.getGeneralFeedback();
         //const generalFeedbackObject = createGeneralFeedbackObject(quizFeedback, typedItem.getPoints());
         return {
@@ -364,7 +364,7 @@ function itemToObject(
     case FormApp.ItemType.GRID:
       return (() => {
         const typedItem = item.asGridItem();
-        // TODO: The GridItem type of Forms API doesn't have getGeneralFeedback and getPoints method, for now.
+        // TODO: The GridItem type of Forms API doesn't have getGeneralFeedback and getPoints method for now.
         // const quizFeedback = typedItem.getGeneralFeedback();
         // const generalFeedbackObject = createGeneralFeedbackObject(quizFeedback, typedItem.getPoints());
         return {
