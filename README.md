@@ -5,8 +5,8 @@ A set of bi-directional translation utilities between Google Spreadsheet, Google
 # Installation
 
 ```
-git clone https://github.com/kubohiroya/google-classroom-sheets-util.git
-cd google-classroom-sheets-util
+git clone https://github.com/kubohiroya/google-classroom-sheets-bidi.git
+cd google-classroom-sheets-bidi
 yarn install
 clasp login
 clasp create --title "MyClassrooms" --type sheets --rootDir ./dist
