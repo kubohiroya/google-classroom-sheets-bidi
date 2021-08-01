@@ -1,4 +1,4 @@
-# google-classroom-sheets-util
+# google-classroom-sheets-bidi
 
 A set of bi-directional translation utilities between Google Spreadsheet, Google Classroom and Google Forms.
 
