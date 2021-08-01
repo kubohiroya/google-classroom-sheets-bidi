@@ -1,4 +1,5 @@
 import { getSchema } from "../sheetUtil";
+import RangeList = GoogleAppsScript.Spreadsheet.RangeList;
 type Sheet = GoogleAppsScript.Spreadsheet.Sheet;
 type Range = GoogleAppsScript.Spreadsheet.Range;
 
@@ -15,7 +16,7 @@ export const getSelectedCourse = (): CourseData => {
   const getSelectedCourseOnCoursesSheet = (sheet: Sheet) => {
     const activeRange = sheet.getActiveRange();
     const values =
-      sheet.getName() === "courses" && activeRange != null
+      getSchema(sheet.getName()) === "courses" && activeRange != null
         ? activeRange.getValues()
         : sheet.getRange(2, 1, 1, 2).getValues();
     if (values.length != 1 && values[0].length < 2) {
@@ -100,38 +101,40 @@ export const getSelectedCourse = (): CourseData => {
   }
 };
 
-export const getSelectedCourseWorks = (): CourseWorkData => {
-  const getSelectedCourseWorkOfSelectedRow = (activeRange: Range) => {
-    const values = activeRange.getValues();
-    const courseId = values[0][0] as string;
-    const courseName = values[0][1] as string;
-    const courseWorkId = values[0][2] as string;
-    const courseWorkTitle = values[0][3] as string;
-    return { courseId, courseName, courseWorkId, courseWorkTitle };
+export const getSelectedCourseWorksList = (): Array<CourseWorkData> => {
+
+  const getSelectedCourseWorkList = (values: Array<Array<string>>) => {
+    return Array.from(new Map<string, CourseWorkData>(values.map((row: string[])=> [row[2], {
+      courseId: row[0],
+      courseName: row[1],
+      courseWorkId: row[2],
+      courseWorkTitle: row[3],
+    }])).values());
   };
 
-  const getSelectedCourseWorkOfSelectedSheet = (sheet: Sheet) => {
-    const values = sheet.getRange(2, 1, 1, 4).getValues();
-    const courseId = values[0][0] as string;
-    const courseName = values[0][1] as string;
-    const courseWorkId = values[0][2] as string;
-    const courseWorkTitle = values[0][3] as string;
-    return { courseId, courseName, courseWorkId, courseWorkTitle };
+  const getSelectedCourseWorkListOfSelectedRows = (activeRangeList: RangeList): Array<CourseWorkData> => {
+    const values = activeRangeList.getRanges().map(activeRange=>activeRange.getValues()).flat();
+    return getSelectedCourseWorkList(values);
+  };
+
+  const getSelectedCourseWorkListOfSelectedSheet = (sheet: Sheet): Array<CourseWorkData> => {
+    const values = sheet.getRange(2, 1, sheet.getMaxRows() - 1, 4).getValues();
+    return getSelectedCourseWorkList(values);
   };
 
   const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   const activeSheet = spreadsheet.getActiveSheet();
-  const activeRange = activeSheet.getActiveRange();
+  const activeRangeList = activeSheet.getActiveRangeList();
   switch (getSchema(activeSheet.getName())) {
     case "courseworks":
-      if (!activeRange || activeRange.getRowIndex() == 0) {
+      if (!activeRangeList || activeRangeList.getRanges().length == 0) {
         throw new Error(
-          "エラー：選択中のシート「課題一覧(courseworks:コース名)」において、課題の行を、いずれか1行だけ選択状態にしてから、再実行してください。"
+          "エラー：選択中のシート「課題一覧(courseworks:コース名)」において、課題の行を選択状態にしてから、再実行してください。"
         );
       }
-      return getSelectedCourseWorkOfSelectedRow(activeRange);
+      return getSelectedCourseWorkListOfSelectedRows(activeRangeList);
     case "submissions":
-      return getSelectedCourseWorkOfSelectedSheet(activeSheet);
+      return getSelectedCourseWorkListOfSelectedSheet(activeSheet);
     case "courses":
     case "teachers":
     case "students":
