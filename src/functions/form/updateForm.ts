@@ -25,15 +25,16 @@ export function exportFormWithDialog(): void {
     return input;
   }
 
-  const title = getFormTitle();
-
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const { createdAt, updatedAt } = getCreatedAtUpdatedAtValues(ss.getId());
     const sheet = ss.getActiveSheet();
 
     const json = sheetToJson(sheet, createdAt, updatedAt);
-    const form = FormApp.create(json.metadata.title);
+
+    const title = json.metadata.title && json.metadata.title !== "" ? json.metadata.title : getFormTitle();
+
+    const form = FormApp.create(title);
     jsonToForm(json, form);
 
     const file = DriveApp.getFileById(form.getId());
@@ -86,6 +87,7 @@ export function updateForm(): void {
         "\\n" +
         JSON.stringify(exception, null, " ")
     );
+    throw exception;
   }
 }
 
