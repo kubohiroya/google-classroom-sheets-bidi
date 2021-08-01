@@ -1,9 +1,9 @@
 {
-  "name": "google-classroom-sheets-util",
+  "name": "google-classroom-sheets-bidi",
   "version": "1.3.1",
   "description": "Google Classroom Utilities based on Google Spreadsheet / Google Apps Script",
   "main": "src/Code.ts",
-  "repository": "https://github.com/kubohiroya/google-classroom-sheets-util.git",
+  "repository": "https://github.com/kubohiroya/google-classroom-sheets-bidi.git",
   "author": "Hiroya Kubo <hiroya@cuc.ac.jp>",
   "license": "MIT",
   "private": false,
