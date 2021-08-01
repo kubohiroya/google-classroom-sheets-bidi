@@ -1,4 +1,4 @@
-import { getSelectedCourse, getSelectedCourseWorks } from "./selectors";
+import { getSelectedCourse, getSelectedCourseWorksList } from "./selectors";
 import { createOrSelectSheetBySheetName } from "../sheetUtil";
 type ListStudentsResponse = GoogleAppsScript.Classroom.Schema.ListStudentsResponse;
 type Student = GoogleAppsScript.Classroom.Schema.Student;
@@ -243,6 +243,7 @@ const updateCourseMemberSheet = (
     "氏名",
     "写真URL",
   ]);
+  sheet.setFrozenRows(1);
   data.forEach(function (item) {
     if (item.profile && item.profile.name && item.profile.photoUrl) {
       sheet.appendRow([
@@ -283,6 +284,7 @@ function updateCoursesSheet(sheet: Sheet, data: Course[]): void {
     "カレンダーID",
     "生徒数",
   ]);
+  sheet.setFrozenRows(1);
   data.forEach(function (course: Course) {
     if (course.id && course.ownerId) {
       const user = getTeacherProfile(course.id, course.ownerId);
@@ -370,6 +372,7 @@ function updateCourseWorksSheet(
     "提出物フォルダ",
     "選択肢",
   ]);
+  sheet.setFrozenRows(1);
   data.forEach(function (courseWork) {
     if (courseWork.courseId) {
       const row = courseWorkToRow(courseWork);
@@ -382,7 +385,8 @@ function updateStudentSubmissionsSheet(
   sheet: Sheet,
   courseName: string,
   courseWorkTitle: string,
-  data: StudentSubmission[]
+  data: StudentSubmission[],
+  initialize: boolean,
 ): void {
   const submissionToRow = function (studentSubmission: StudentSubmission) {
     if (
@@ -446,19 +450,22 @@ function updateStudentSubmissionsSheet(
     return row;
   };
 
-  sheet.clear();
-  sheet.appendRow([
-    "courseId",
-    "コース名",
-    "courseWorkId",
-    "課題タイトル",
-    "氏名",
-    "メールアドレス",
-    "写真URL",
-    "状態",
-    "作成日",
-    "更新日",
-  ]);
+  if (initialize) {
+    sheet.clear();
+    sheet.appendRow([
+      "courseId",
+      "コース名",
+      "courseWorkId",
+      "課題タイトル",
+      "氏名",
+      "メールアドレス",
+      "写真URL",
+      "状態",
+      "作成日",
+      "更新日",
+    ]);
+    sheet.setFrozenRows(1);
+  }
   data.forEach(function (submission) {
     sheet.appendRow(submissionToRow(submission));
   });
@@ -529,32 +536,43 @@ export function importCourseWorks(): void {
   }
 }
 
+type SelectedCourseWorks = {
+  courseId: string;
+  courseName: string;
+  courseWorkId: string;
+  courseWorkTitle: string;
+};
 export function importStudentSubmissions(): void {
   try {
-    const {
-      courseId,
-      courseName,
-      courseWorkId,
-      courseWorkTitle,
-    } = getSelectedCourseWorks();
+    const selectedCourseWorksList: Array<SelectedCourseWorks> = getSelectedCourseWorksList();
 
-    const studentSubmissions = listStudentSubmissions(
-      courseId,
-      courseName,
-      courseWorkId
-    );
+    selectedCourseWorksList.forEach((selectedCourseWorks, index: number)=>{
+      const {courseId, courseName, courseWorkId, courseWorkTitle} = selectedCourseWorks;
+      if(! courseId || courseId === ""){
+        return;
+      }
+      const studentSubmissions = listStudentSubmissions(
+        courseId,
+        courseName,
+        courseWorkId
+      );
 
-    const targetSheetName = courseName + " " + courseWorkTitle;
-    const targetSheet = createOrSelectSheetBySheetName(
-      "submissions:" + targetSheetName,
-      "orange"
-    );
-    updateStudentSubmissionsSheet(
-      targetSheet,
-      courseName,
-      courseWorkTitle,
-      studentSubmissions
-    );
+      const targetSheet= createOrSelectSheetBySheetName(
+        (selectedCourseWorksList.length == 1)?
+          "submissions:" + courseName + " " + courseWorkTitle
+          : "submissions:" + courseName,
+        "orange"
+      );
+
+      updateStudentSubmissionsSheet(
+        targetSheet,
+        courseName,
+        courseWorkTitle,
+        studentSubmissions,
+        index === 0
+      );
+    });
+
   } catch (error) {
     Browser.msgBox(error);
   }
