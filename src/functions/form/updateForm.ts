@@ -1,4 +1,4 @@
-import { messages } from "./messages";
+import { messages } from "../../messages";
 import sheetToJson from "./sheetToJson";
 import { jsonToForm } from "./jsonToForm";
 import { getCreatedAtUpdatedAtValues } from "../driveFileUtil";

@@ -12,8 +12,8 @@ type CourseWorkData = {
   courseWorkTitle: string;
 } & CourseData;
 
-export const getSelectedCourse = (): CourseData => {
-  const getSelectedCourseOnCoursesSheet = (sheet: Sheet) => {
+export function getSelectedCourse(): CourseData {
+  function getSelectedCourseOnCoursesSheet (sheet: Sheet) {
     const activeRange = sheet.getActiveRange();
     const values =
       getSchema(sheet.getName()) === "courses" && activeRange != null
@@ -34,13 +34,13 @@ export const getSelectedCourse = (): CourseData => {
         "エラー：「courses」シートで、対象コースの行を、いずれか1行だけ選択状態にしてから、再実行してください。"
       );
     }
-  };
+  }
 
-  const getSelectedCourseOnSheet = (
+  function getSelectedCourseOnSheet(
     sheet: Sheet,
     schema: string,
     caption: string
-  ) => {
+  ) {
     const values = sheet.getRange(2, 1, 1, 2).getValues();
     Logger.log("getSelectedCourseOnSheet:" + JSON.stringify(values));
     const courseId = values[0][0] as string;
@@ -56,23 +56,23 @@ export const getSelectedCourse = (): CourseData => {
       );
     }
     return { courseId, courseName };
-  };
+  }
 
-  const getSelectedCourseOnTeachersSheet = (sheet: Sheet) => {
+  function getSelectedCourseOnTeachersSheet(sheet: Sheet) {
     return getSelectedCourseOnSheet(
       sheet,
       "teachers",
       "2.教師一覧(シート名：teachers:コース名)を抽出"
     );
-  };
+  }
 
-  const getSelectedCourseOnStudentsSheet = (sheet: Sheet) => {
+  function getSelectedCourseOnStudentsSheet (sheet: Sheet) {
     return getSelectedCourseOnSheet(
       sheet,
       "students",
       "3.生徒一覧(シート名：students:コース名)を抽出"
     );
-  };
+  }
 
   const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   const activeSheet = spreadsheet.getActiveSheet();
@@ -99,28 +99,28 @@ export const getSelectedCourse = (): CourseData => {
         );
       }
   }
-};
+}
 
-export const getSelectedCourseWorksList = (): Array<CourseWorkData> => {
+export function getSelectedCourseWorksList(): Array<CourseWorkData> {
 
-  const getSelectedCourseWorkList = (values: Array<Array<string>>) => {
+  function getSelectedCourseWorkList(values: Array<Array<string>>) {
     return Array.from(new Map<string, CourseWorkData>(values.map((row: string[])=> [row[2], {
       courseId: row[0],
       courseName: row[1],
       courseWorkId: row[2],
       courseWorkTitle: row[3],
     }])).values());
-  };
+  }
 
-  const getSelectedCourseWorkListOfSelectedRows = (activeRangeList: RangeList): Array<CourseWorkData> => {
+  function getSelectedCourseWorkListOfSelectedRows (activeRangeList: RangeList): Array<CourseWorkData> {
     const values = activeRangeList.getRanges().map(activeRange=>activeRange.getValues()).flat();
     return getSelectedCourseWorkList(values);
-  };
+  }
 
-  const getSelectedCourseWorkListOfSelectedSheet = (sheet: Sheet): Array<CourseWorkData> => {
+  function getSelectedCourseWorkListOfSelectedSheet (sheet: Sheet): Array<CourseWorkData> {
     const values = sheet.getRange(2, 1, sheet.getMaxRows() - 1, 4).getValues();
     return getSelectedCourseWorkList(values);
-  };
+  }
 
   const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   const activeSheet = spreadsheet.getActiveSheet();
@@ -143,4 +143,4 @@ export const getSelectedCourseWorksList = (): Array<CourseWorkData> => {
         "エラー：選択中のシート「課題一覧(courseworks:コース名)」において、課題の行を、いずれか1行だけ選択状態にしてから、再実行してください。"
       );
   }
-};
+}

@@ -1,6 +1,6 @@
 import formToJson from "./formToJson";
 import jsonToSheet from "./jsonToSheet";
-import { messages } from "./messages";
+import { messages } from "../../messages";
 type Form = GoogleAppsScript.Forms.Form;
 type Sheet = GoogleAppsScript.Spreadsheet.Sheet;
 import { getCreatedAtUpdatedAtValues } from "../driveFileUtil";

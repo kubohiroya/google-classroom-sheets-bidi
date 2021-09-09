@@ -6,7 +6,7 @@ import {
   SurveyJsMatrixItemObject,
 } from "./types";
 
-export const jsonToFormColumnNames = (formSrc: FormSource): Array<string> => {
+export function jsonToFormColumnNames (formSrc: FormSource): Array<string> {
   const columnNames = new Array<string>();
   formSrc.items.forEach((element) => {
     if (element.type === "surveyJs:matrix") {
@@ -31,12 +31,12 @@ export const jsonToFormColumnNames = (formSrc: FormSource): Array<string> => {
   // Logger.log(JSON.stringify(formSrc, null, " "));
   // Logger.log(columnNames.join("\n"));
   return columnNames;
-};
+}
 
-export const traverseFormSrc = (
+export function traverseFormSrc(
   formSrc: FormSource,
   callback: (type: string, key1: string, key2?: string) => void
-): void => {
+): void {
   formSrc.items.forEach((element) => {
     if (element.type === "surveyJs:matrix") {
       const matrix = (element as unknown) as SurveyJsMatrixItemObject;
@@ -58,12 +58,12 @@ export const traverseFormSrc = (
       callback(item.type, item.title);
     }
   });
-};
+}
 
-export const getRubricScores = (
+export function getRubricScores(
   formSrc: FormSource,
   data: Array<string | number>
-): { rowScores: Array<number>; total: number } => {
+): { rowScores: Array<number>; total: number } {
   const rowScores = new Array<number>();
   let total = 0;
   formSrc.items.forEach((element) => {
@@ -81,7 +81,7 @@ export const getRubricScores = (
     }
   });
   return { rowScores, total };
-};
+}
 /*
 function createSummarySheet(formSrc: FormObject, reviewers: Array<ReviewUser>, reviewees: Array<ReviewUser>, resultSheet: Sheet, summarySheet: Sheet){
   const scoreTotal = 10; // FIXME

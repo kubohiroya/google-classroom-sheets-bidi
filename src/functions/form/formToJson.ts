@@ -53,17 +53,11 @@ import {
 type ListItem = GoogleAppsScript.Forms.ListItem;
 type TimeItem = GoogleAppsScript.Forms.TimeItem;
 
-/**
- * Convert a Google Form object into JSON Object.
- * @returns JSON object of forms data
- * @param form {Form} a Google Form Object
- * */
-
-const getFormMetadata = (
+function getFormMetadata(
   form: Form,
   createdAt: number,
   updatedAt: number
-): FormMetadataObject => {
+): FormMetadataObject {
   const metadata: FormMetadataObject = {
     quiz: form.isQuiz(),
     collectEmail: form.collectsEmail(),
@@ -98,7 +92,13 @@ const getFormMetadata = (
   }
 
   return metadata;
-};
+}
+
+/**
+ * Convert a Google Form object into JSON Object.
+ * @returns JSON object of forms data
+ * @param form {Form} a Google Form Object
+ * */
 
 export default function formToJson(
   form: Form,

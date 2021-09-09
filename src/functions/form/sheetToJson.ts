@@ -117,9 +117,9 @@ const COL_INDEX = {
   },
 };
 
-const createFormMetadata = (
+function createFormMetadata (
   values: SpreadsheetValues
-): Partial<FormMetadataObject> => {
+): Partial<FormMetadataObject> {
   const metadataSrc: Record<string, SpreadsheetCell | string[]> = {};
   values.map((row: SpreadsheetRow) => {
     if (row.length >= 2) {
@@ -135,7 +135,7 @@ const createFormMetadata = (
   });
   return {} as Partial<FormMetadataObject>;
   //return (metadataSrc as unknown) as FormMetadataObject;
-};
+}
 
 function createFormItemObjects(
   values: Array<Array<string | number | boolean | Date | null>>
@@ -151,10 +151,10 @@ function createFormItemObjects(
   return itemObjects;
 }
 
-const createFormItemObject = (
+function createFormItemObject (
   row: Array<string | number | boolean | Date | null>,
   itemObjects: Array<ItemObject>
-): void => {
+): void {
   const type = row[COL_INDEX.TYPE] as string;
   if (type.startsWith("surveyJs:")) {
     if (type === "surveyJs:matrix") {

@@ -455,9 +455,6 @@ function itemToRows(item: ItemObject): SpreadsheetValues {
   return values;
 }
 
-/**
-   与えられたitemsのJSONをもとに、スプレッドシートに書き込む2次元配列での値を生成する
-   */
 function jsonToValues(json: FormSource): SpreadsheetValues {
   const values: SpreadsheetValues = [];
   const keys = METADATA_KEYS as Array<keyof FormMetadataObject>;
@@ -477,7 +474,7 @@ function jsonToValues(json: FormSource): SpreadsheetValues {
   return values;
 }
 
-const setConditionalRules = (sheet: Sheet) => {
+function setConditionalRules(sheet: Sheet){
   sheet.setConditionalFormatRules(
     Object.entries(typeStyles).map(([key, style]) =>
       SpreadsheetApp.newConditionalFormatRule()
@@ -490,9 +487,6 @@ const setConditionalRules = (sheet: Sheet) => {
   );
 };
 
-/**
-   与えられた2次元配列の値をもとに、指定されたシートに対して、所与の文法でセルに値を設定していく
-   */
 function valuesToSheet(values: SpreadsheetValues, sheet: Sheet) {
   sheet.clear();
   setConditionalRules(sheet);

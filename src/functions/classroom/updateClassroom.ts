@@ -75,7 +75,7 @@ export function updateCourseTeachers(): void {
   }
 
   const currentTeachersMap = new Map<string, Map<string, Teacher>>();
-  const updateCurrentCourseTeachersMap = function (courseId: string) {
+  function updateCurrentCourseTeachersMap(courseId: string) {
     if (!Classroom.Courses) {
       throw new Error("Classroom.Courses is undefined.");
     }
@@ -101,7 +101,7 @@ export function updateCourseTeachers(): void {
   };
 
   const updatedTeachersMap = new Map<string, Map<string, string>>();
-  const updateCourseTeachersMap = function (
+  function updateCourseTeachersMap (
     courseId: string,
     email: string,
     teacherName: string

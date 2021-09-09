@@ -33,16 +33,18 @@ type SurveyJsPage = {
 };
 
 export function jsonToSurveyJs(formSrc: FormSource): SurveyJsSourceObject {
-  const createPage = (
+  function createPage(
     pageNumber: number,
     options?: Record<string, string>
-  ): SurveyJsPage => ({
-    name: "page" + pageNumber,
-    elements: [] as Array<FormItem | SurveyJsItem>,
-    ...options,
-  });
+  ): SurveyJsPage {
+    return {
+      name: "page" + pageNumber,
+      elements: [] as Array<FormItem | SurveyJsItem>,
+      ...options,
+    }
+  }
 
-  const formSrcItemToSurveyJsItem = (item: ItemObject) => {
+  function formSrcItemToSurveyJsItem (item: ItemObject) {
     if (item.type === "surveyJs:matrix") {
       return {
         ...item,
@@ -153,7 +155,7 @@ export function jsonToSurveyJs(formSrc: FormSource): SurveyJsSourceObject {
     } else {
       throw new Error("Invalid type: " + item.type);
     }
-  };
+  }
 
   const pages = [createPage(1)] as Array<SurveyJsPage>;
 
