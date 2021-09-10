@@ -8,8 +8,9 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "build": "webpack --mode=development && cp appsscript.json src/functions/picker/picker.html dist",
-    "deploy": "yarn build && clasp push"
+    "build": "webpack --mode=development && cp appsscript.json src/picker/picker.html dist",
+    "deploy": "yarn build && clasp push",
+    "open": "clasp open"
   },
   "devDependencies": {
     "@types/google-apps-script": "^1.0.32",

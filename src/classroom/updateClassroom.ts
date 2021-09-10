@@ -1,5 +1,5 @@
 type Teacher = GoogleAppsScript.Classroom.Schema.Teacher;
-import { formatDateTime } from "../dateTimeUtils";
+import { formatDateTime } from "./dateTimeUtils";
 
 export function updateCourses(): void {
   const sheet = SpreadsheetApp.getActiveSheet();

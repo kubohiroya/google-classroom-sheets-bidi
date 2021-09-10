@@ -1,5 +1,5 @@
 import { getSelectedCourse, getSelectedCourseWorksList } from "./selectors";
-import { createOrSelectSheetBySheetName } from "../sheetUtil";
+import { createOrSelectSheetBySheetName } from "../form/sheetUtil";
 type ListStudentsResponse = GoogleAppsScript.Classroom.Schema.ListStudentsResponse;
 type Student = GoogleAppsScript.Classroom.Schema.Student;
 type Teacher = GoogleAppsScript.Classroom.Schema.Teacher;
@@ -11,7 +11,7 @@ type StudentSubmission = GoogleAppsScript.Classroom.Schema.StudentSubmission;
 type Sheet = GoogleAppsScript.Spreadsheet.Sheet;
 type Course = GoogleAppsScript.Classroom.Schema.Course;
 type CourseWork = GoogleAppsScript.Classroom.Schema.CourseWork;
-import { formatDateTime } from "../dateTimeUtils";
+import { formatDateTime } from "./dateTimeUtils";
 
 const teacherProfiles = new Map<string, UserProfile>();
 const studentProfiles = new Map<string, UserProfile>();
@@ -233,16 +233,11 @@ const updateCourseMemberSheet = (
   sheet: Sheet,
   courseId: string,
   courseName: string,
-  data: Teacher[] | Student[]
+  data: Teacher[] | Student[],
+  headers: string[]
 ): void => {
   sheet.clear();
-  sheet.appendRow([
-    "courseId",
-    "コース名",
-    "メールアドレス",
-    "氏名",
-    "写真URL",
-  ]);
+  sheet.appendRow(headers);
   sheet.setFrozenRows(1);
   data.forEach(function (item) {
     if (item.profile && item.profile.name && item.profile.photoUrl) {
@@ -261,29 +256,9 @@ export function regulatePhotoUrl(photoUrl: string): string {
   return (photoUrl.startsWith("//") ? "https:" : "") + photoUrl;
 }
 
-function updateCoursesSheet(sheet: Sheet, data: Course[]): void {
+function updateCoursesSheet(sheet: Sheet, data: Course[], headers: string[]): void {
   sheet.clear();
-  sheet.appendRow([
-    "courseId",
-    "コース名",
-    "セクション",
-    "説明",
-    "部屋",
-    "オーナー教員名",
-    "オーナー教員Email",
-    "作成日",
-    "更新日",
-    "クラスコード",
-    "状態",
-    "代替リンク",
-    "教師グループEmail",
-    "コースグループEmail",
-    "教師フォルダId",
-    "教師フォルダ代替リンク",
-    "保護者機能有効化",
-    "カレンダーID",
-    "生徒数",
-  ]);
+  sheet.appendRow(headers);
   sheet.setFrozenRows(1);
   data.forEach(function (course: Course) {
     if (course.id && course.ownerId) {
@@ -317,7 +292,8 @@ function updateCoursesSheet(sheet: Sheet, data: Course[]): void {
 function updateCourseWorksSheet(
   sheet: Sheet,
   courseName: string,
-  data: CourseWork[]
+  data: CourseWork[],
+  headers: string[]
 ): void {
   const courseWorkToRow = function (courseWork: CourseWork) {
     if (!courseWork.courseId) {
@@ -349,29 +325,7 @@ function updateCourseWorksSheet(
   };
 
   sheet.clear();
-  sheet.appendRow([
-    "courseId",
-    "コース名",
-    "courseWorkId",
-    "課題タイトル",
-    "説明",
-    "状態",
-    "代替リンク",
-    "作成日",
-    "更新日",
-    "期限日",
-    "期限時刻",
-    "スケジュールされた時刻",
-    "配点",
-    "種類",
-    "開発者モード",
-    "割当",
-    "個別割当対象者リスト",
-    "作成者ID",
-    "トピックID",
-    "提出物フォルダ",
-    "選択肢",
-  ]);
+  sheet.appendRow(headers);
   sheet.setFrozenRows(1);
   data.forEach(function (courseWork) {
     if (courseWork.courseId) {
@@ -387,6 +341,7 @@ function updateStudentSubmissionsSheet(
   courseWorkTitle: string,
   data: StudentSubmission[],
   initialize: boolean,
+  headers: string[]
 ): void {
   const submissionToRow = function (studentSubmission: StudentSubmission) {
     if (
@@ -452,18 +407,7 @@ function updateStudentSubmissionsSheet(
 
   if (initialize) {
     sheet.clear();
-    sheet.appendRow([
-      "courseId",
-      "コース名",
-      "courseWorkId",
-      "課題タイトル",
-      "氏名",
-      "メールアドレス",
-      "写真URL",
-      "状態",
-      "作成日",
-      "更新日",
-    ]);
+    sheet.appendRow(headers);
     sheet.setFrozenRows(1);
   }
   data.forEach(function (submission) {
@@ -471,69 +415,49 @@ function updateStudentSubmissionsSheet(
   });
 }
 
-export function importCourses(): void {
+export function importCourses(headers: string[]): void {
   const user = Session.getActiveUser();
   const sheet = createOrSelectSheetBySheetName(
     "courses:" + user.getEmail(),
     "black"
   );
-  updateCoursesSheet(sheet, listCourses(user.getEmail()));
+  updateCoursesSheet(sheet, listCourses(user.getEmail()), headers);
 }
 
-export function importCourseTeachers(): void {
-  try {
-    const { courseId, courseName } = getSelectedCourse();
-    const teacherSheet = createOrSelectSheetBySheetName(
-      "teachers:" + courseName,
-      "yellow"
-    );
-    const teachers = listTeacherProfiles(courseId);
-    if (teachers.length === 0) {
-      throw new Error(
-        "エラー：選択されたコース「" +
-          courseName +
-          "」には、教員が登録されていません。"
-      );
-    }
-    updateCourseMemberSheet(teacherSheet, courseId, courseName, teachers);
-  } catch (err) {
-    Browser.msgBox(err);
+export function importCourseTeachers(headers: string[]): void {
+  const { courseId, courseName } = getSelectedCourse();
+  const teacherSheet = createOrSelectSheetBySheetName(
+    "teachers:" + courseName,
+    "yellow"
+  );
+  const teachers = listTeacherProfiles(courseId);
+  if (teachers.length === 0) {
+    throw new Error("NoRegisteredTeacher: "+courseName)
   }
+  updateCourseMemberSheet(teacherSheet, courseId, courseName, teachers, headers);
 }
 
-export function importCourseStudents(): void {
-  try {
-    const { courseId, courseName } = getSelectedCourse();
-    const studentSheet = createOrSelectSheetBySheetName(
-      "students:" + courseName,
-      "yellow"
-    );
-    const students = listStudentProfiles(courseId);
-    if (students.length === 0) {
-      throw new Error(
-        "エラー：選択されたコース「" +
-          courseName +
-          "」には、生徒が登録されていません。"
-      );
-    }
-    updateCourseMemberSheet(studentSheet, courseId, courseName, students);
-  } catch (err) {
-    Browser.msgBox(err);
+export function importCourseStudents(headers: string[]): void {
+  const { courseId, courseName } = getSelectedCourse();
+  const studentSheet = createOrSelectSheetBySheetName(
+    "students:" + courseName,
+    "yellow"
+  );
+  const students = listStudentProfiles(courseId);
+  if (students.length === 0) {
+    throw new Error("NoRegisteredStudent: "+courseName);
   }
+  updateCourseMemberSheet(studentSheet, courseId, courseName, students, headers);
 }
 
-export function importCourseWorks(): void {
-  try {
-    const { courseId, courseName } = getSelectedCourse();
-    const targetSheet = createOrSelectSheetBySheetName(
-      "courseworks:" + courseName,
-      "yellow"
-    );
-    const courseWorks = listCourseWorks(courseId);
-    updateCourseWorksSheet(targetSheet, courseName, courseWorks);
-  } catch (error) {
-    Browser.msgBox(error);
-  }
+export function importCourseWorks(headers: string[]): void {
+  const { courseId, courseName } = getSelectedCourse();
+  const targetSheet = createOrSelectSheetBySheetName(
+    "courseworks:" + courseName,
+    "yellow"
+  );
+  const courseWorks = listCourseWorks(courseId);
+  updateCourseWorksSheet(targetSheet, courseName, courseWorks, headers);
 }
 
 type SelectedCourseWorks = {
@@ -542,38 +466,34 @@ type SelectedCourseWorks = {
   courseWorkId: string;
   courseWorkTitle: string;
 };
-export function importStudentSubmissions(): void {
-  try {
-    const selectedCourseWorksList: Array<SelectedCourseWorks> = getSelectedCourseWorksList();
+export function importStudentSubmissions(studentSubmissionsHeaders: string[]): void {
+  const selectedCourseWorksList: Array<SelectedCourseWorks> = getSelectedCourseWorksList();
 
-    selectedCourseWorksList.forEach((selectedCourseWorks, index: number)=>{
-      const {courseId, courseName, courseWorkId, courseWorkTitle} = selectedCourseWorks;
-      if(! courseId || courseId === ""){
-        return;
-      }
-      const studentSubmissions = listStudentSubmissions(
-        courseId,
-        courseName,
-        courseWorkId
-      );
+  selectedCourseWorksList.forEach((selectedCourseWorks, index: number)=>{
+    const {courseId, courseName, courseWorkId, courseWorkTitle} = selectedCourseWorks;
+    if(! courseId || courseId === ""){
+      return;
+    }
+    const studentSubmissions = listStudentSubmissions(
+      courseId,
+      courseName,
+      courseWorkId
+    );
 
-      const targetSheet= createOrSelectSheetBySheetName(
-        (selectedCourseWorksList.length == 1)?
-          "submissions:" + courseName + " " + courseWorkTitle
-          : "submissions:" + courseName,
-        "orange"
-      );
+    const targetSheet= createOrSelectSheetBySheetName(
+      (selectedCourseWorksList.length == 1)?
+        "submissions:" + courseName + " " + courseWorkTitle
+        : "submissions:" + courseName,
+      "orange"
+    );
 
-      updateStudentSubmissionsSheet(
-        targetSheet,
-        courseName,
-        courseWorkTitle,
-        studentSubmissions,
-        index === 0
-      );
-    });
-
-  } catch (error) {
-    Browser.msgBox(error);
-  }
+    updateStudentSubmissionsSheet(
+      targetSheet,
+      courseName,
+      courseWorkTitle,
+      studentSubmissions,
+      index === 0,
+      studentSubmissionsHeaders
+    );
+  });
 }

@@ -1,6 +1,5 @@
 import { showPicker } from "./picker/picker";
-import { getCreatedAtUpdatedAtValues } from "./driveFileUtil";
-import { formToSheet } from "./form/importForm";
+import {formToSheet} from './form';
 
 const INPUT_FORM_OR_FORM_SHEET_URL_PROMPT =
   "★「フォーム」の場合：「docs.google.com/forms」で始まるもの　" +
@@ -191,10 +190,7 @@ export function execute(
       case COMMAND.CONVERT_FORM_TO_FORM_SHEET:
         if (context.url) {
           const form = FormApp.openByUrl(context.url);
-          const { createdAt, updatedAt } = getCreatedAtUpdatedAtValues(
-            form.getId()
-          );
-          formToSheet(form, createdAt, updatedAt, null);
+          formToSheet(form, null);
         }
         break;
 

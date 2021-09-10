@@ -1,7 +1,7 @@
 import { FormSource } from "./types";
-import { getCreatedAtUpdatedAtValues } from "../driveFileUtil";
+import { getCreatedAtUpdatedAtValues } from "./driveFileUtil";
 import formToJson from "./formToJson";
-import { openSheetByUrl } from "../sheetUtil";
+import { openSheetByUrl } from "./sheetUtil";
 import sheetToJson from "./sheetToJson";
 
 export function getFormSrc(
